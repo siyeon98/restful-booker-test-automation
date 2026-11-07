@@ -19,12 +19,13 @@ The project focuses on automated UI testing of core user-facing features, includ
 | Room / Booking | 7 | Room information and booking navigation |
 | Contact Form | 14 | Required fields, email validation, and input boundaries |
 | Navigation | 6 | Rooms, Booking, Amenities, Location, Contact, and Admin navigation |
-| **Total** | **28** | **27 active tests, 1 marked as `test.fixme()`** |
+| Location | 1 | Address, phone number, and email content verification |
+| **Total** | **29** | **28 active tests, 1 marked as `test.fixme()`** |
 
 The test suite runs across Chromium, Firefox, and WebKit.
 
 **Latest local UI test run:**
-- 81 passed
+- 84 passed
 - 3 skipped
 - 0 failed
 
