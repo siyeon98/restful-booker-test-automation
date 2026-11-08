@@ -12,6 +12,7 @@ The project focuses on automated UI testing of core user-facing features and adm
 - dotenv
 - Prettier
 - Git / GitHub
+- GitHub Actions (CI)
 
 ## Test Coverage
 
@@ -76,6 +77,10 @@ ADMIN_PASSWORD=<demo-admin-password>
 Use the credentials provided by the public demo application.
 
 The `.env` file is excluded from Git tracking to avoid committing credentials.
+
+For CI execution, configure `ADMIN_USERNAME` and `ADMIN_PASSWORD` as GitHub Actions repository secrets.
+
+The workflow passes these secrets as environment variables to the Playwright test process, allowing admin authentication tests to run without storing credentials in the repository.
 
 ## Running Tests
 
