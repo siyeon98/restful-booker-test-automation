@@ -13,6 +13,9 @@ The project validates room information, navigation, contact form behavior, and a
 | Configuration | dotenv |
 | Code Formatting | Prettier |
 | CI/CD | GitHub Actions |
+| Reporting | Playwright HTML and JSON reporters |
+| Workflow Scripting | Python |
+| Notifications | Slack Incoming Webhooks, Block Kit |
 | Version Control | Git, GitHub |
 
 ## Test Coverage
@@ -71,8 +74,6 @@ restful-booker-ui-automation/
 ├── playwright.config.ts
 └── README.md
 ```
-
-A local `.env` file stores admin test credentials and is excluded from version control.
 
 ## Getting Started
 
@@ -136,19 +137,23 @@ The Playwright configuration includes:
 - Chromium, Firefox, and WebKit projects
 - No retries for local execution
 - Two retries and one worker in CI
-- HTML reporting
+- HTML reporting for all runs and an additional JSON report in CI
 - Trace collection on the first retry
 
 ## Continuous Integration
 
 GitHub Actions runs the Playwright test suite on a GitHub-hosted Ubuntu runner.
 
-**Execution triggers:**
+### Execution Triggers
 
-- Push to `main` or `master`
-- Pull requests targeting `main` or `master`
+| Trigger | Configuration |
+| --- | --- |
+| Push | Automatically runs on pushes to `main` or `master` |
+| Pull Request | Runs on pull requests targeting `main` or `master` |
+| Manual | GitHub Actions → Playwright Tests → Run workflow |
+| Scheduled | Configured daily at 22:23 Asia/Seoul (13:23 UTC) on the default branch |
 
-**Workflow steps:**
+### Workflow Steps
 
 1. Check out the repository.
 2. Set up the latest Node.js LTS version.
@@ -156,18 +161,28 @@ GitHub Actions runs the Playwright test suite on a GitHub-hosted Ubuntu runner.
 4. Install Playwright browsers and required system dependencies.
 5. Execute the Playwright test suite.
 6. Upload the HTML report as a workflow artifact.
-
-Admin credentials are supplied through GitHub Actions repository secrets.
-
-**Reporting:**
-
-- Artifact: `playwright-report`
-- Retention: 30 days
-- Upload attempted unless the workflow is cancelled
-
-The GitHub Actions workflow was verified to complete successfully after the previous test and documentation updates.
+7. Send a Slack notification with the CI job result and any available test summary.
 
 [View GitHub Actions runs](https://github.com/siyeon98/restful-booker-ui-automation/actions)
+
+### Test Reporting
+
+| Setting | Value |
+| --- | --- |
+| Report Format | HTML |
+| Artifact Name | `playwright-report` |
+| Retention Period | 30 days |
+| Upload Condition | Upload attempted unless the workflow is cancelled |
+
+The HTML report can be downloaded from the **Artifacts** section of an individual GitHub Actions run when the report was generated and uploaded.
+
+### Slack Test Notifications
+
+GitHub Actions sends structured notifications using **Slack Incoming Webhooks and Block Kit**. The notification step runs on job success or failure and sends a message when the webhook is available.
+
+The message includes the job result, execution trigger, and a link to the GitHub Actions run. When `test-results/playwright-summary.json` is available, the message also includes the passed, failed, skipped, and flaky counts across all three browser projects and the Playwright execution duration.
+
+Slack delivery with test counts and duration was verified on a successful push run. Scheduled execution and Slack delivery on failure are pending verification.
 
 ## Known Limitations
 
@@ -193,6 +208,5 @@ await expect(page).toHaveURL(/\/admin\/rooms\/?$/);
 
 ## Security
 
-- Local admin credentials are stored in a Git-ignored `.env` file.
-- CI credentials are provided through GitHub Actions Secrets.
+- CI admin credentials and the Slack Incoming Webhook URL are stored in GitHub Actions Secrets as `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `SLACK_WEBHOOK_URL`.
 - Credentials are not hardcoded in test files.
