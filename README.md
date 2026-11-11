@@ -54,7 +54,7 @@ The suite is organized by application feature to keep tests readable and maintai
 ## Project Structure
 
 ```text
-restful-booker-test-automation/
+restful-booker-ui-automation/
 ├── .github/
 │   └── workflows/
 │       └── playwright.yml
@@ -83,8 +83,8 @@ A local `.env` file stores admin test credentials and is excluded from version c
 ### Installation
 
 ```bash
-git clone https://github.com/siyeon98/restful-booker-test-automation.git
-cd restful-booker-test-automation
+git clone https://github.com/siyeon98/restful-booker-ui-automation.git
+cd restful-booker-ui-automation
 npm ci
 npx playwright install
 ```
@@ -167,7 +167,7 @@ Admin credentials are supplied through GitHub Actions repository secrets.
 
 The GitHub Actions workflow was verified to complete successfully after the previous test and documentation updates.
 
-[View GitHub Actions runs](https://github.com/siyeon98/restful-booker-test-automation/actions)
+[View GitHub Actions runs](https://github.com/siyeon98/restful-booker-ui-automation/actions)
 
 ## Known Limitations
 
