@@ -46,6 +46,7 @@ jobs:
         import os
         import urllib.error
         import urllib.request
+        from pathlib import Path
 
         webhook = os.environ.get("SLACK_WEBHOOK_URL")
         if not webhook:
@@ -70,13 +71,33 @@ jobs:
             f"/actions/runs/{os.environ['GITHUB_RUN_ID']}"
         )
 
+        fields = [{"type": "mrkdwn", "text": f"*Trigger*\n{trigger}"}]
+
+        report = Path("test-results/playwright-summary.json")
+        try:
+            stats = json.loads(report.read_text(encoding="utf-8"))["stats"]
+            tests = (
+                f"{stats['expected']} passed · {stats['unexpected']} failed · "
+                f"{stats['skipped']} skipped · {stats['flaky']} flaky"
+            )
+            minutes, seconds = divmod(round(stats["duration"] / 1000), 60)
+            fields.extend([
+                {"type": "mrkdwn", "text": f"*Tests (all browsers)*\n{tests}"},
+                {"type": "mrkdwn", "text": f"*Duration*\n{minutes}m {seconds:02d}s"},
+            ])
+        except (OSError, ValueError, KeyError, TypeError):
+            fields.append({
+                "type": "mrkdwn",
+                "text": "*Tests*\nTest summary unavailable — see Actions logs.",
+            })
+
         payload = {
             "text": title,
             "blocks": [
                 {"type": "header", "text": {"type": "plain_text", "text": title}},
                 {
                     "type": "section",
-                    "fields": [{"type": "mrkdwn", "text": f"*Trigger*\n{trigger}"}],
+                    "fields": fields,
                 },
                 {"type": "divider"},
                 {
