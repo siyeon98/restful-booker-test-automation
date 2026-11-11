@@ -1,52 +1,78 @@
-# Restful Booker Test Automation
+# Restful Booker UI Test Automation
 
-Automated UI tests for the [Restful Booker Platform](https://automationintesting.online/), built with Playwright and TypeScript.
+Automated UI testing for the [Restful Booker Platform](https://automationintesting.online/) using **Playwright and TypeScript**.
 
-The project focuses on automated UI testing of core user-facing features and admin authentication, including homepage checks, room information, booking navigation, contact form validation, navigation menu behavior, and login/logout workflows.
+The project validates room information, navigation, contact form behavior, and admin authentication across **Chromium, Firefox, and WebKit**, with automated execution through GitHub Actions.
 
 ## Tech Stack
 
-- Playwright
-- TypeScript
-- Node.js / npm
-- dotenv
-- Prettier
-- Git / GitHub
-- GitHub Actions (CI)
+| Category | Technologies |
+| --- | --- |
+| Test Automation | Playwright, TypeScript |
+| Runtime | Node.js, npm |
+| Configuration | dotenv |
+| Code Formatting | Prettier |
+| CI/CD | GitHub Actions |
+| Version Control | Git, GitHub |
 
 ## Test Coverage
 
 | Area | Tests | Coverage |
 | --- | ---: | --- |
 | Homepage | 1 | Homepage smoke testing |
-| Room / Booking | 7 | Room information and booking navigation |
-| Contact Form | 14 | Required fields, email validation, and input boundaries |
+| Rooms & Booking | 7 | Room information, pricing, and reservation page navigation |
+| Contact Form | 14 | Required fields, email validation, and input length boundaries |
 | Navigation | 6 | Rooms, Booking, Amenities, Location, Contact, and Admin navigation |
-| Location | 1 | Address, phone number, and email content verification |
-| Admin Authentication | 5 | Valid login, logout, invalid credentials, post-logout access restriction, and empty credentials |
+| Location | 1 | Address, phone number, and email verification |
+| Admin Authentication | 5 | Valid and invalid login, logout, empty credentials, and post-logout access checks |
 | **Total** | **34** | **33 active tests, 1 marked as `test.fixme()`** |
 
-The test suite is configured for Chromium, Firefox, and WebKit.
+### Verified Test Results
 
-**Latest full cross-browser regression run:**
+The latest verified full local regression run across three browsers completed with:
 
-- 99 passed
-- 3 skipped
-- 0 failed
-- Execution time: 46.0 seconds
+| Metric | Result |
+| --- | --- |
+| Passed | **99** |
+| Failed | **0** |
+| Skipped | **3** |
+| Execution time | 46.0 seconds |
 
-The three skipped executions correspond to the known Amenities navigation issue marked with `test.fixme()`.
+The three skipped executions correspond to the Amenities navigation test marked with `test.fixme()`.
 
-### Testing Techniques
+## Test Design & Implementation
 
-- Positive and negative testing
-- Boundary Value Analysis
-- Data-driven testing
-- Reusable test helpers
-- Playwright locators and assertions
-- Cross-browser testing
-- Defect reproduction and known-issue tracking
-- Authentication workflow testing
+- **Positive and negative testing:** Valid and invalid inputs for authentication and contact form behavior.
+- **Boundary Value Analysis:** Phone, subject, and message field lengths tested around their validation limits.
+- **Parameterized tests:** Reusable test scenarios for room information and form validation.
+- **Reusable helpers:** Shared setup for admin login and contact form inputs.
+- **Cross-browser execution:** The same test suite runs against Chromium, Firefox, and WebKit.
+- **Playwright assertions:** Verifies page content, navigation, visibility, and validation feedback.
+
+The suite is organized by application feature to keep tests readable and maintainable.
+
+## Project Structure
+
+```text
+restful-booker-test-automation/
+├── .github/
+│   └── workflows/
+│       └── playwright.yml
+├── tests/
+│   ├── admin.spec.ts
+│   ├── contact.spec.ts
+│   ├── home.spec.ts
+│   ├── location.spec.ts
+│   ├── navigation.spec.ts
+│   └── rooms.spec.ts
+├── .gitignore
+├── package.json
+├── package-lock.json
+├── playwright.config.ts
+└── README.md
+```
+
+A local `.env` file stores admin test credentials and is excluded from version control.
 
 ## Getting Started
 
@@ -59,13 +85,11 @@ The three skipped executions correspond to the known Amenities navigation issue 
 ```bash
 git clone https://github.com/siyeon98/restful-booker-test-automation.git
 cd restful-booker-test-automation
-npm install
+npm ci
 npx playwright install
 ```
 
-### Admin Test Configuration
-
-Admin authentication tests read credentials from environment variables.
+### Environment Configuration
 
 Create a `.env` file in the project root:
 
@@ -74,54 +98,101 @@ ADMIN_USERNAME=<demo-admin-username>
 ADMIN_PASSWORD=<demo-admin-password>
 ```
 
-Use the credentials provided by the public demo application.
+Replace the placeholders with credentials provided by the demo application.
 
-The `.env` file is excluded from Git tracking to avoid committing credentials.
-
-For CI execution, configure `ADMIN_USERNAME` and `ADMIN_PASSWORD` as GitHub Actions repository secrets.
-
-The workflow passes these secrets as environment variables to the Playwright test process, allowing admin authentication tests to run without storing credentials in the repository.
+The `.env` file is ignored by Git. Do not commit credentials to the repository.
 
 ## Running Tests
 
-Run the full test suite:
+Run the full suite:
 
 ```bash
-npx playwright test
+npm test
 ```
 
-Run Admin Authentication tests in Chromium:
+Run tests in a specific browser:
 
 ```bash
-npx playwright test tests/ui/admin.spec.ts --project=chromium
+npx playwright test --project=chromium
 ```
 
-View the HTML test report:
+Run a specific test file:
+
+```bash
+npx playwright test tests/admin.spec.ts --project=chromium
+```
+
+Open the HTML report:
 
 ```bash
 npx playwright show-report
 ```
 
+### Test Configuration
+
+The Playwright configuration includes:
+
+- Parallel test execution (`fullyParallel: true`)
+- Chromium, Firefox, and WebKit projects
+- No retries for local execution
+- Two retries and one worker in CI
+- HTML reporting
+- Trace collection on the first retry
+
+## Continuous Integration
+
+GitHub Actions runs the Playwright test suite on a GitHub-hosted Ubuntu runner.
+
+**Execution triggers:**
+
+- Push to `main` or `master`
+- Pull requests targeting `main` or `master`
+
+**Workflow steps:**
+
+1. Check out the repository.
+2. Set up the latest Node.js LTS version.
+3. Install dependencies using `npm ci`.
+4. Install Playwright browsers and required system dependencies.
+5. Execute the Playwright test suite.
+6. Upload the HTML report as a workflow artifact.
+
+Admin credentials are supplied through GitHub Actions repository secrets.
+
+**Reporting:**
+
+- Artifact: `playwright-report`
+- Retention: 30 days
+- Upload attempted unless the workflow is cancelled
+
+The GitHub Actions workflow was verified to complete successfully after the previous test and documentation updates.
+
+[View GitHub Actions runs](https://github.com/siyeon98/restful-booker-test-automation/actions)
+
+## Known Limitations
+
+- **Amenities navigation:** The link updates the URL to `#amenities`, but the corresponding section is absent from the observed page DOM. The test is retained as `test.fixme()`.
+- **Booking completion:** Full booking completion is not covered. Previous investigation encountered a loading issue and an HTTP 500 response from a room API request.
+- **Admin authorization:** The post-logout test verifies the displayed login UI, not server-side authorization.
+- **Public demo environment:** Application behavior and availability may change, potentially affecting test stability.
+- **Contact form submissions:** Valid submission tests may create additional data in the public demo environment.
+
 ## Troubleshooting
 
-### Admin Logout Test Timing
+### Admin Logout Timing
 
-**Observed issue:** The automated logout test failed when Logout was clicked immediately after the login helper, although manual logout worked.
+**Issue:** The automated logout test intermittently failed when attempting to log out immediately after login, although manual logout worked.
 
-**Change:** Added a Playwright URL assertion to wait for navigation to the Admin Rooms page before clicking Logout.
+**Action:** Added a URL assertion to verify navigation to the Admin Rooms page before proceeding.
 
 ```ts
 await expect(page).toHaveURL(/\/admin\/rooms\/?$/);
 ```
 
-**Verification:** The logout test passed five consecutive repetitions, and the Admin Authentication test suite passed in Chromium. The subsequent full cross-browser regression run completed with 99 passed, 3 skipped, and 0 failed.
+**Verification:** The logout test passed five consecutive repetitions. The exact root cause was not conclusively established.
 
-**Remaining uncertainty:** The exact root cause was not conclusively established. The test should continue to be monitored for intermittent failures.
+## Security
 
-## Known Limitations
-
-- **Amenities navigation:** Clicking the Amenities menu changes the URL to `#amenities`, but the page does not scroll to a corresponding section. The observed page DOM does not contain an element with `id="amenities"`. This issue was reproduced in Chromium, Firefox, and WebKit. The regression test is retained and marked with `test.fixme()` until the issue is resolved.
-- **Booking completion:** Completed booking workflows are not covered. The demo booking page has previously remained in a loading state, and a room API request returned HTTP 500.
-- **Admin access restriction:** The post-logout test verifies the login UI after attempting to revisit a protected page. It does not independently verify server-side authorization.
-- **Public demo environment:** Application behavior and availability may change.
-- **Contact form submissions:** Valid contact form tests submit messages to the demo application. Repeated execution may create additional demo data.
+- Local admin credentials are stored in a Git-ignored `.env` file.
+- CI credentials are provided through GitHub Actions Secrets.
+- Credentials are not hardcoded in test files.
