@@ -1,6 +1,6 @@
 # Restful Booker Test Automation
 
-A QA automation portfolio project for the [Restful Booker Platform](https://automationintesting.online/), using Playwright and TypeScript.
+Automated UI tests for the [Restful Booker Platform](https://automationintesting.online/), built with Playwright and TypeScript.
 
 The project focuses on automated UI testing of core user-facing features and admin authentication, including homepage checks, room information, booking navigation, contact form validation, navigation menu behavior, and login/logout workflows.
 
@@ -26,14 +26,14 @@ The project focuses on automated UI testing of core user-facing features and adm
 | Admin Authentication | 5 | Valid login, logout, invalid credentials, post-logout access restriction, and empty credentials |
 | **Total** | **34** | **33 active tests, 1 marked as `test.fixme()`** |
 
-The test suite runs across Chromium, Firefox, and WebKit.
+The test suite is configured for Chromium, Firefox, and WebKit.
 
 **Latest full cross-browser regression run:**
 
 - 99 passed
 - 3 skipped
 - 0 failed
-- Execution time: 44.6 seconds
+- Execution time: 46.0 seconds
 
 The three skipped executions correspond to the known Amenities navigation issue marked with `test.fixme()`.
 
