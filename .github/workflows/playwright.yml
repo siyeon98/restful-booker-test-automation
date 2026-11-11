@@ -1,4 +1,5 @@
 name: Playwright Tests
+
 on:
   push:
     branches: [ main, master ]
@@ -7,6 +8,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '23 13 * * *'
+
 jobs:
   test:
     timeout-minutes: 60
@@ -31,3 +33,76 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+
+    - name: Notify Slack
+      if: ${{ success() || failure() }}
+      continue-on-error: true
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        JOB_STATUS: ${{ job.status }}
+      run: |
+        python3 - <<'PY'
+        import json
+        import os
+        import urllib.error
+        import urllib.request
+
+        webhook = os.environ.get("SLACK_WEBHOOK_URL")
+        if not webhook:
+            print("::warning::Slack notification skipped because SLACK_WEBHOOK_URL is unavailable.")
+            raise SystemExit(0)
+
+        passed = os.environ["JOB_STATUS"] == "success"
+        icon = "✅" if passed else "❌"
+        label = "PASSED" if passed else "FAILED"
+        title = f"{icon} Restful Booker UI Tests — {label}"
+
+        triggers = {
+            "push": "Push",
+            "pull_request": "Pull Request",
+            "schedule": "Scheduled",
+            "workflow_dispatch": "Manual",
+        }
+        event = os.environ["GITHUB_EVENT_NAME"]
+        trigger = triggers.get(event, event)
+        run_url = (
+            f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}"
+            f"/actions/runs/{os.environ['GITHUB_RUN_ID']}"
+        )
+
+        payload = {
+            "text": title,
+            "blocks": [
+                {"type": "header", "text": {"type": "plain_text", "text": title}},
+                {
+                    "type": "section",
+                    "fields": [{"type": "mrkdwn", "text": f"*Trigger*\n{trigger}"}],
+                },
+                {"type": "divider"},
+                {
+                    "type": "actions",
+                    "elements": [{
+                        "type": "button",
+                        "text": {"type": "plain_text", "text": "View GitHub Actions Run"},
+                        "url": run_url,
+                        "action_id": "view_test_run",
+                    }],
+                },
+            ],
+        }
+
+        request = urllib.request.Request(
+            webhook,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+
+        try:
+            with urllib.request.urlopen(request, timeout=15) as response:
+                print(f"Slack notification sent: HTTP {response.status}")
+        except urllib.error.HTTPError as error:
+            print(f"::warning::Slack notification failed: HTTP {error.code}.")
+        except (urllib.error.URLError, TimeoutError):
+            print("::warning::Slack notification could not reach the webhook.")
+        PY
